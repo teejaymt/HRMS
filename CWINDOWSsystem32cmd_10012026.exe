@@ -1,0 +1,307 @@
+[6:32:14 PM] Starting compilation in watch mode...
+
+src/biometric/biometric.controller.ts:37:49 - error TS2345: Argument of type '{ deviceCode: string; name: string; deviceType: BiometricType; ipAddress: string; port?: number | undefined; location: string; vendor?: string | undefined; model?: string | undefined; serialNumber?: string | undefined; connectionType?: string | undefined; username?: string | undefined; password?: string | undefined; }' is not assignable to parameter of type '{ deviceCode: string; deviceName: string; name: string; deviceType: BiometricType; ipAddress: string; port?: number | undefined; location: string; vendor?: string | undefined; ... 4 more ...; password?: string | undefined; }'.
+  Property 'deviceName' is missing in type '{ deviceCode: string; name: string; deviceType: BiometricType; ipAddress: string; port?: number | undefined; location: string; vendor?: string | undefined; model?: string | undefined; serialNumber?: string | undefined; connectionType?: string | undefined; username?: string | undefined; password?: string | undefined; }' but required in type '{ deviceCode: string; deviceName: string; name: string; deviceType: BiometricType; ipAddress: string; port?: number | undefined; location: string; vendor?: string | undefined; ... 4 more ...; password?: string | undefined; }'.
+
+37     return this.biometricService.registerDevice(body);
+                                                   ~~~~
+
+  src/biometric/biometric.service.ts:15:5
+    15     deviceName: string;
+           ~~~~~~~~~~
+    'deviceName' is declared here.
+
+src/erp/erp.service.ts:26:7 - error TS2322: Type '{ employeeMapping: string | null; payrollMapping: string | null; name: string; erpSystem: ERPSystem; endpoint: string; apiKey?: string; username?: string; password?: string; syncDirection?:SyncDirection; syncFrequency?: string; }' is not assignable to type '(Without<ERPIntegrationCreateInput, ERPIntegrationUncheckedCreateInput> & ERPIntegrationUncheckedCreateInput) | (Without<...> & ERPIntegrationCreateInput)'.
+  Type '{ employeeMapping: string | null; payrollMapping: string | null; name: string; erpSystem: ERPSystem; endpoint: string; apiKey?: string; username?: string; password?: string; syncDirection?: SyncDirection; syncFrequency?: string; }'is not assignable to type 'Without<ERPIntegrationUncheckedCreateInput, ERPIntegrationCreateInput> & ERPIntegrationCreateInput'.
+    Property 'apiEndpoint' is missing in type '{ employeeMapping: string | null; payrollMapping: string | null; name: string; erpSystem: ERPSystem; endpoint: string; apiKey?: string; username?: string; password?: string; syncDirection?: SyncDirection; syncFrequency?: string; }' but required in type 'ERPIntegrationCreateInput'.
+
+26       data: {
+         ~~~~
+
+  node_modules/.prisma/client/index.d.ts:51962:5
+    51962     apiEndpoint: string
+              ~~~~~~~~~~~
+    'apiEndpoint' is declared here.
+  node_modules/.prisma/client/index.d.ts:41686:5
+    41686     data: XOR<ERPIntegrationCreateInput, ERPIntegrationUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: ERPIntegrationSelect<DefaultArgs> | null | undefined; omit?: ERPIntegrationOmit<DefaultArgs> | null | undefined; include?: ERPIntegrationInclude<...> | ... 1 more ... | undefined; data: (Without<...> & ERPIntegrationUncheckedCreateInput) | (Without<...> & ERPIntegrationCreateInput); }'
+
+src/erp/erp.service.ts:102:7 - error TS2322: Type '"FAILED"' is not assignable to type '"SUCCESS"'.
+
+102       status = SyncStatus.FAILED;
+          ~~~~~~
+
+src/erp/erp.service.ts:112:9 - error TS2353: Object literal may only specify known properties, and 'action' does not exist in type '(Without<ERPSyncLogCreateInput, ERPSyncLogUncheckedCreateInput> & ERPSyncLogUncheckedCreateInput) | (Without<...> & ERPSyncLogCreateInput)'.
+
+112         action: SyncAction.SYNC,
+            ~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:42980:5
+    42980     data: XOR<ERPSyncLogCreateInput, ERPSyncLogUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: ERPSyncLogSelect<DefaultArgs> | null | undefined; omit?: ERPSyncLogOmit<DefaultArgs> | null | undefined; include?: ERPSyncLogInclude<...> | ... 1 more ... | undefined; data: (Without<...> & ERPSyncLogUncheckedCreateInput) | (Without<...> & ERPSyncLogCreateInput); }'
+
+src/erp/erp.service.ts:113:34 - error TS2339: Property 'EXPORT' does not exist on type '{ BIDIRECTIONAL: "BIDIRECTIONAL"; TO_ERP: "TO_ERP"; FROM_ERP: "FROM_ERP"; }'.
+
+113         direction: SyncDirection.EXPORT,
+                                     ~~~~~~
+
+src/erp/erp.service.ts:116:21 - error TS2367: This comparison appears to be unintentional because the types '"SUCCESS"'and '"FAILED"' have no overlap.
+
+116         errorCount: status === SyncStatus.FAILED ? recordsProcessed : 0,
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/erp/erp.service.ts:131:13 - error TS2367: This comparison appears to be unintentional because the types '"SUCCESS"'and '"FAILED"' have no overlap.
+
+131         ...(status === SyncStatus.FAILED && {
+                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/erp/erp.service.ts:163:11 - error TS2353: Object literal may only specify known properties, and 'payPeriodEnd' doesnot exist in type 'PayrollWhereInput'.
+
+163           payPeriodEnd: { lte: endDate },
+              ~~~~~~~~~~~~
+
+src/erp/erp.service.ts:177:7 - error TS2322: Type '"FAILED"' is not assignable to type '"SUCCESS"'.
+
+177       status = SyncStatus.FAILED;
+          ~~~~~~
+
+src/erp/erp.service.ts:187:9 - error TS2353: Object literal may only specify known properties, and 'action' does not exist in type '(Without<ERPSyncLogCreateInput, ERPSyncLogUncheckedCreateInput> & ERPSyncLogUncheckedCreateInput) | (Without<...> & ERPSyncLogCreateInput)'.
+
+187         action: SyncAction.SYNC,
+            ~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:42980:5
+    42980     data: XOR<ERPSyncLogCreateInput, ERPSyncLogUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: ERPSyncLogSelect<DefaultArgs> | null | undefined; omit?: ERPSyncLogOmit<DefaultArgs> | null | undefined; include?: ERPSyncLogInclude<...> | ... 1 more ... | undefined; data: (Without<...> & ERPSyncLogUncheckedCreateInput) | (Without<...> & ERPSyncLogCreateInput); }'
+
+src/erp/erp.service.ts:188:34 - error TS2339: Property 'EXPORT' does not exist on type '{ BIDIRECTIONAL: "BIDIRECTIONAL"; TO_ERP: "TO_ERP"; FROM_ERP: "FROM_ERP"; }'.
+
+188         direction: SyncDirection.EXPORT,
+                                     ~~~~~~
+
+src/erp/erp.service.ts:191:21 - error TS2367: This comparison appears to be unintentional because the types '"SUCCESS"'and '"FAILED"' have no overlap.
+
+191         errorCount: status === SyncStatus.FAILED ? recordsProcessed : 0,
+                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/erp/erp.service.ts:211:9 - error TS2561: Object literal may only specify known properties, but 'integration' does not exist in type 'ERPSyncLogInclude<DefaultArgs>'. Did you mean to write 'erpIntegration'?
+
+211         integration: true,
+            ~~~~~~~~~~~
+
+src/erp/erp.service.ts:232:57 - error TS2339: Property 'EXPORT' does not exist on type '{ BIDIRECTIONAL: "BIDIRECTIONAL"; TO_ERP: "TO_ERP"; FROM_ERP: "FROM_ERP"; }'.
+
+232         if (integration.syncDirection === SyncDirection.EXPORT ||
+                                                            ~~~~~~
+
+src/leaves/leaves.service.ts:24:53 - error TS2339: Property 'getWorkflowDefinitionByType' does not exist on type 'WorkflowsService'.
+
+24     const workflowDef = await this.workflowsService.getWorkflowDefinitionByType('LEAVE');
+                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/leaves/leaves.service.ts:26:35 - error TS2339: Property 'startWorkflow' does not exist on type 'WorkflowsService'.
+
+26       await this.workflowsService.startWorkflow(
+                                     ~~~~~~~~~~~~~
+
+src/leaves/leaves.service.ts:62:51 - error TS2339: Property 'getWorkflowsByEntity' does not exist on type 'WorkflowsService'.
+
+62     const workflows = await this.workflowsService.getWorkflowsByEntity('LEAVE', id);
+                                                     ~~~~~~~~~~~~~~~~~~~~
+
+src/leaves/leaves.service.ts:68:11 - error TS2554: Expected 1 arguments, but got 3.
+
+68           activeWorkflow.currentStep,
+             ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+69           approvedBy,
+   ~~~~~~~~~~~~~~~~~~~~
+
+src/leaves/leaves.service.ts:88:51 - error TS2339: Property 'getWorkflowsByEntity' does not exist on type 'WorkflowsService'.
+
+88     const workflows = await this.workflowsService.getWorkflowsByEntity('LEAVE', id);
+                                                     ~~~~~~~~~~~~~~~~~~~~
+
+src/leaves/leaves.service.ts:92:37 - error TS2339: Property 'rejectStep' does not exist on type 'WorkflowsService'.
+
+92         await this.workflowsService.rejectStep(
+                                       ~~~~~~~~~~
+
+src/recruitment/recruitment.service.ts:39:7 - error TS2322: Type '{ status: "DRAFT"; jobTitle: string; jobTitleArabic?:string; departmentId?: number; description: string; requirements: string; responsibilities?: string; experienceYears?: number; educationLevel?: string; ... 7 more ...; postedBy: string; }' is not assignable to type '(Without<JobPostingCreateInput, JobPostingUncheckedCreateInput> & JobPostingUncheckedCreateInput) | (Without<...> & JobPostingCreateInput)'.
+  Type '{ status: "DRAFT"; jobTitle: string; jobTitleArabic?: string; departmentId?: number; description: string; requirements: string; responsibilities?: string; experienceYears?: number; educationLevel?: string; ... 7 more ...; postedBy:string; }' is not assignable to type 'Without<JobPostingUncheckedCreateInput, JobPostingCreateInput> & JobPostingCreateInput'.
+    Type '{ status: "DRAFT"; jobTitle: string; jobTitleArabic?: string; departmentId?: number; description: string; requirements: string; responsibilities?: string; experienceYears?: number; educationLevel?: string; ... 7 more ...; postedBy: string; }' is not assignable to type 'Without<JobPostingUncheckedCreateInput, JobPostingCreateInput>'.
+      Types of property 'departmentId' are incompatible.
+        Type 'number | undefined' is not assignable to type 'undefined'.
+          Type 'number' is not assignable to type 'undefined'.
+
+39       data: {
+         ~~~~
+
+  node_modules/.prisma/client/index.d.ts:37738:5
+    37738     data: XOR<JobPostingCreateInput, JobPostingUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: JobPostingSelect<DefaultArgs> | null | undefined; omit?: JobPostingOmit<DefaultArgs> | null | undefined; include?: JobPostingInclude<...> | ... 1 more ... | undefined; data: (Without<...> & JobPostingUncheckedCreateInput) | (Without<...> & JobPostingCreateInput); }'
+
+src/recruitment/recruitment.service.ts:341:24 - error TS2339: Property 'OFFER_NEGOTIATION' does not exist on type '{ APPLICATION_REVIEW: "APPLICATION_REVIEW"; PHONE_SCREENING: "PHONE_SCREENING"; TECHNICAL_INTERVIEW: "TECHNICAL_INTERVIEW"; HR_INTERVIEW: "HR_INTERVIEW"; MANAGER_INTERVIEW: "MANAGER_INTERVIEW"; ... 4 more ...; HIRED: "HIRED"; }'.
+
+341       RecruitmentStage.OFFER_NEGOTIATION
+                           ~~~~~~~~~~~~~~~~~
+
+src/ticket-request/ticket-request.service.ts:173:9 - error TS2353: Object literal may only specify known properties, and 'bookedBy' does not exist in type '(Without<TicketRequestUpdateInput, TicketRequestUncheckedUpdateInput> & TicketRequestUncheckedUpdateInput) | (Without<...> & TicketRequestUpdateInput)'.
+
+173         bookedBy,
+            ~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:32787:5
+    32787     data: XOR<TicketRequestUpdateInput, TicketRequestUncheckedUpdateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: TicketRequestSelect<DefaultArgs> | null | undefined; omit?: TicketRequestOmit<DefaultArgs> | null | undefined; include?: TicketRequestInclude<...> | ... 1 more ... | undefined; data: (Without<...> & TicketRequestUncheckedUpdateInput) | (Without<...> & TicketRequestUpdateInput); where: TicketRequestWhereUn...'
+
+src/workflows/workflows.service.ts:22:9 - error TS2322: Type 'string' is not assignable to type 'WorkflowStepUncheckedCreateNestedManyWithoutWorkflowDefinitionInput | WorkflowStepCreateNestedManyWithoutWorkflowDefinitionInput | undefined'.
+
+22         steps: JSON.stringify(data.steps),
+           ~~~~~
+
+  node_modules/.prisma/client/index.d.ts:50287:5
+    50287     steps?: WorkflowStepUncheckedCreateNestedManyWithoutWorkflowDefinitionInput
+              ~~~~~
+    The expected type comes from property 'steps' which is declared here on type '(Without<WorkflowDefinitionCreateInput, WorkflowDefinitionUncheckedCreateInput> & WorkflowDefinitionUncheckedCreateInput) | (Without<...> & WorkflowDefinitionCreateInput)'
+
+src/workflows/workflows.service.ts:36:29 - error TS2339: Property 'steps' does not exist on type '{ isActive: boolean; createdAt: Date; updatedAt: Date; id: number; name: string; description: string | null; entityType: string; }'.
+
+36       steps: JSON.parse(def.steps),
+                               ~~~~~
+
+src/workflows/workflows.service.ts:52:36 - error TS2339: Property 'steps' does not exist on type '{ isActive: boolean; createdAt: Date; updatedAt: Date; id: number; name: string; description: string | null; entityType: string; }'.
+
+52       steps: JSON.parse(definition.steps),
+                                      ~~~~~
+
+src/workflows/workflows.service.ts:68:9 - error TS2353: Object literal may only specify known properties, and 'workflowId' does not exist in type '(Without<WorkflowInstanceCreateInput, WorkflowInstanceUncheckedCreateInput> & WorkflowInstanceUncheckedCreateInput) | (Without<...> & WorkflowInstanceCreateInput)'.
+
+68         workflowId: data.workflowId,
+           ~~~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:27540:5
+    27540     data: XOR<WorkflowInstanceCreateInput, WorkflowInstanceUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: WorkflowInstanceSelect<DefaultArgs> | null | undefined; omit?: WorkflowInstanceOmit<DefaultArgs> | null | undefined; include?: WorkflowInstanceInclude<...> | ... 1 more ... | undefined; data: (Without<...> & WorkflowInstanceUncheckedCreateInput) | (Without<...> & WorkflowInstanceCreateInput); }'
+
+src/workflows/workflows.service.ts:81:9 - error TS2353: Object literal may only specify known properties, and 'instanceId' does not exist in type '(Without<WorkflowHistoryCreateInput, WorkflowHistoryUncheckedCreateInput> & WorkflowHistoryUncheckedCreateInput) | (Without<...> & WorkflowHistoryCreateInput)'.
+
+81         instanceId: instance.id,
+           ~~~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:28714:5
+    28714     data: XOR<WorkflowHistoryCreateInput, WorkflowHistoryUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: WorkflowHistorySelect<DefaultArgs> | null | undefined; omit?: WorkflowHistoryOmit<DefaultArgs> | null | undefined; include?: WorkflowHistoryInclude<...> | ... 1 more ... | undefined; data: (Without<...> & WorkflowHistoryUncheckedCreateInput) | (Without<...> & WorkflowHistoryCreateInput); }'
+
+src/workflows/workflows.service.ts:83:32 - error TS2339: Property 'INITIATED' does not exist on type '{ APPROVED: "APPROVED"; REJECTED: "REJECTED"; COMMENTED: "COMMENTED"; PENDING: "PENDING"; }'.
+
+83         action: WorkflowAction.INITIATED,
+                                  ~~~~~~~~~
+
+src/workflows/workflows.service.ts:101:18 - error TS2353: Object literal may only specify known properties, and 'workflow' does not exist in type 'WorkflowInstanceInclude<DefaultArgs>'.
+
+101       include: { workflow: true },
+                     ~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:27341:5
+    27341     include?: WorkflowInstanceInclude<ExtArgs> | null
+              ~~~~~~~
+    The expected type comes from property 'include' which is declared here on type '{ select?: WorkflowInstanceSelect<DefaultArgs> | null | undefined; omit?: WorkflowInstanceOmit<DefaultArgs> | null | undefined; include?: WorkflowInstanceInclude<...> | ... 1 more ... | undefined; where: WorkflowInstanceWhereUniqueInput; }'
+
+src/workflows/workflows.service.ts:109:17 - error TS2304: Cannot find name 'HttpException'.
+
+109       throw new HttpException('Workflow is not in progress', HttpStatus.BAD_REQUEST);
+                    ~~~~~~~~~~~~~
+
+src/workflows/workflows.service.ts:109:62 - error TS2304: Cannot find name 'HttpStatus'.
+
+109       throw new HttpException('Workflow is not in progress', HttpStatus.BAD_REQUEST);
+                                                                 ~~~~~~~~~~
+
+src/workflows/workflows.service.ts:112:39 - error TS2339: Property 'workflow' does not exist on type '{ createdAt: Date; updatedAt: Date; id: number; status: WorkflowStatus; entityType: string; completedAt: Date | null; entityId: number; currentStep: number; initiatedBy: string; workflowDefinitionId: number; }'.
+
+112     const steps = JSON.parse(instance.workflow.steps);
+                                          ~~~~~~~~
+
+src/workflows/workflows.service.ts:118:9 - error TS2353: Object literal may only specify known properties, and 'instanceId' does not exist in type '(Without<WorkflowHistoryCreateInput, WorkflowHistoryUncheckedCreateInput> & WorkflowHistoryUncheckedCreateInput) | (Without<...> & WorkflowHistoryCreateInput)'.
+
+118         instanceId: instance.id,
+            ~~~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:28714:5
+    28714     data: XOR<WorkflowHistoryCreateInput, WorkflowHistoryUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: WorkflowHistorySelect<DefaultArgs> | null | undefined; omit?: WorkflowHistoryOmit<DefaultArgs> | null | undefined; include?: WorkflowHistoryInclude<...> | ... 1 more ... | undefined; data: (Without<...> & WorkflowHistoryUncheckedCreateInput) | (Without<...> & WorkflowHistoryCreateInput); }'
+
+src/workflows/workflows.service.ts:128:30 - error TS2339: Property 'totalSteps' does not exist on type '{ createdAt: Date; updatedAt: Date; id: number; status: WorkflowStatus; entityType: string; completedAt: Date | null; entityId: number;currentStep: number; initiatedBy: string; workflowDefinitionId: number; }'.
+
+128     if (nextStep >= instance.totalSteps) {
+                                 ~~~~~~~~~~
+
+src/workflows/workflows.service.ts:134:11 - error TS2561: Object literal may only specify known properties, but 'completedBy' does not exist in type '(Without<WorkflowInstanceUpdateInput, WorkflowInstanceUncheckedUpdateInput> & WorkflowInstanceUncheckedUpdateInput) | (Without<...> & WorkflowInstanceUpdateInput)'. Did you mean to write 'completedAt'?
+
+134           completedBy: data.actorEmail,
+              ~~~~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:27594:5
+    27594     data: XOR<WorkflowInstanceUpdateInput, WorkflowInstanceUncheckedUpdateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: WorkflowInstanceSelect<DefaultArgs> | null | undefined; omit?: WorkflowInstanceOmit<DefaultArgs> | null | undefined; include?: WorkflowInstanceInclude<...> | ... 1 more ... | undefined; data: (Without<...> & WorkflowInstanceUncheckedUpdateInput) | (Without<...> & WorkflowInstanceUpdateInput); where: Workf...'
+
+src/workflows/workflows.service.ts:167:9 - error TS2353: Object literal may only specify known properties, and 'instanceId' does not exist in type '(Without<WorkflowHistoryCreateInput, WorkflowHistoryUncheckedCreateInput> & WorkflowHistoryUncheckedCreateInput) | (Without<...> & WorkflowHistoryCreateInput)'.
+
+167         instanceId: instance.id,
+            ~~~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:28714:5
+    28714     data: XOR<WorkflowHistoryCreateInput, WorkflowHistoryUncheckedCreateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: WorkflowHistorySelect<DefaultArgs> | null | undefined; omit?: WorkflowHistoryOmit<DefaultArgs> | null | undefined; include?: WorkflowHistoryInclude<...> | ... 1 more ... | undefined; data: (Without<...> & WorkflowHistoryUncheckedCreateInput) | (Without<...> & WorkflowHistoryCreateInput); }'
+
+src/workflows/workflows.service.ts:181:9 - error TS2561: Object literal may only specify known properties, but 'completedBy' does not exist in type '(Without<WorkflowInstanceUpdateInput, WorkflowInstanceUncheckedUpdateInput> & WorkflowInstanceUncheckedUpdateInput) | (Without<...> & WorkflowInstanceUpdateInput)'. Did you mean to write 'completedAt'?
+
+181         completedBy: data.actorEmail,
+            ~~~~~~~~~~~
+
+  node_modules/.prisma/client/index.d.ts:27594:5
+    27594     data: XOR<WorkflowInstanceUpdateInput, WorkflowInstanceUncheckedUpdateInput>
+              ~~~~
+    The expected type comes from property 'data' which is declared here on type '{ select?: WorkflowInstanceSelect<DefaultArgs> | null | undefined; omit?: WorkflowInstanceOmit<DefaultArgs> | null | undefined; include?: WorkflowInstanceInclude<...> | ... 1 more ... | undefined; data: (Without<...> & WorkflowInstanceUncheckedUpdateInput) | (Without<...> & WorkflowInstanceUpdateInput); where: Workf...'
+
+src/workflows/workflows.service.ts:194:22 - error TS2353: Object literal may only specify known properties, and 'timestamp' does not exist in type 'WorkflowHistoryOrderByWithRelationInput | WorkflowHistoryOrderByWithRelationInput[]'.
+
+194           orderBy: { timestamp: 'asc' },
+                         ~~~~~~~~~
+
+src/workflows/workflows.service.ts:206:21 - error TS2339: Property 'workflow' does not exist on type '{ createdAt: Date; updatedAt: Date; id: number; status: WorkflowStatus; entityType: string; completedAt: Date | null; entityId: number; currentStep: number; initiatedBy: string; workflowDefinitionId: number; }'.
+
+206         ...instance.workflow,
+                        ~~~~~~~~
+
+src/workflows/workflows.service.ts:207:36 - error TS2339: Property 'workflow' does not exist on type '{ createdAt: Date; updatedAt: Date; id: number; status: WorkflowStatus; entityType: string; completedAt: Date | null; entityId: number; currentStep: number; initiatedBy: string; workflowDefinitionId: number; }'.
+
+207         steps: JSON.parse(instance.workflow.steps),
+                                       ~~~~~~~~
+
+src/workflows/workflows.service.ts:222:22 - error TS2353: Object literal may only specify known properties, and 'timestamp' does not exist in type 'WorkflowHistoryOrderByWithRelationInput | WorkflowHistoryOrderByWithRelationInput[]'.
+
+222           orderBy: { timestamp: 'asc' },
+                         ~~~~~~~~~
+
+src/workflows/workflows.service.ts:237:9 - error TS2353: Object literal may only specify known properties, and 'workflow' does not exist in type 'WorkflowInstanceInclude<DefaultArgs>'.
+
+237         workflow: true,
+            ~~~~~~~~
+
+src/workflows/workflows.service.ts:243:41 - error TS2339: Property 'workflow' does not exist on type '{ createdAt: Date; updatedAt: Date; id: number; status: WorkflowStatus; entityType: string; completedAt: Date | null; entityId: number; currentStep: number; initiatedBy: string; workflowDefinitionId: number; }'.
+
+243       const steps = JSON.parse(instance.workflow.steps);
+                                            ~~~~~~~~
+
+[6:32:17 PM] Found 44 errors. Watching for file changes.

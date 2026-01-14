@@ -1,0 +1,1355 @@
+// Prisma Schema for Saudi Arabia HRMS - Compliant with Saudi Labor Law
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ========== Authentication & Users ==========
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  role       Role
+  isActive   Boolean   @default(true)
+  employee   Employee? @relation("UserEmployee")
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+enum Role {
+  ADMIN
+  HR
+  MANAGER
+  EMPLOYEE
+}
+
+// ========== Employee Management (Saudi Compliant) ==========
+model Department {
+  id              Int        @id @default(autoincrement())
+  name            String     @unique
+  nameArabic      String?    // Arabic name for official documents
+  description     String?
+  employees       Employee[]
+  jobPostings     JobPosting[]
+  saudiCount      Int        @default(0) // For Nitaqat compliance
+  nonSaudiCount   Int        @default(0) // For Nitaqat compliance
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Employee {
+  id                 Int               @id @default(autoincrement())
+  userId             Int?              @unique
+  user               User?             @relation("UserEmployee", fields: [userId], references: [id])
+  employeeCode       String            @unique
+  
+  // Personal Information (Saudi Compliant)
+  firstName          String
+  lastName           String
+  firstNameArabic    String?           // Arabic name required for official documents
+  lastNameArabic     String?
+  fatherName         String?           // Required for Saudi official documents
+  grandfatherName    String?           // Required for Saudi official documents
+  email              String            @unique
+  phone              String?
+  dateOfBirth        DateTime?
+  dateOfBirthHijri   String?           // Hijri date for Saudi nationals
+  gender             Gender?
+  nationality        String?           // Saudi or other nationality
+  isSaudi            Boolean           @default(false) // For Nitaqat/Saudization
+  
+  // Saudi ID / Iqama Information
+  saudiId            String?           @unique // National ID for Saudis
+  iqamaNumber        String?           @unique // Iqama for expats
+  iqamaExpiryDate    DateTime?         // Critical for expat compliance
+  iqamaExpiryHijri   String?
+  passportNumber     String?
+  passportExpiry     DateTime?
+  visaNumber         String?
+  borderNumber       String?           // Border number (for entry/exit tracking)
+  
+  // GOSI Information (General Organization for Social Insurance)
+  gosiNumber         String?           @unique // GOSI registration number
+  gosiRegistrationDate DateTime?
+  gosiContribution   Boolean           @default(false)
+  
+  // Contact Information
+  address            String?
+  addressArabic      String?
+  city               String?
+  state              String?  // Province (e.g., Riyadh, Makkah, Eastern Province)
+  zipCode            String?
+  country            String?            @default("Saudi Arabia")
+  
+  // Employment Details
+  departmentId       Int?
+  department         Department?        @relation(fields: [departmentId], references: [id])
+  position           String
+  positionArabic     String?
+  employmentType     EmploymentType     @default(FULL_TIME)
+  contractType       ContractType       @default(LIMITED) // Saudi law: limited or unlimited
+  joinDate           DateTime           @default(now())
+  joinDateHijri      String?
+  contractStartDate  DateTime?
+  contractEndDate    DateTime?          // For limited contracts
+  probationEndDate   DateTime?          // 90 days probation as per Saudi law
+  
+  // Salary & Financial (Saudi Compliant)
+  basicSalary        Float              // Basic salary
+  housingAllowance   Float              @default(0) // Common in Saudi Arabia
+  transportAllowance Float              @default(0)
+  foodAllowance      Float              @default(0)
+  otherAllowances    Float              @default(0)
+  totalSalary        Float              // Total package
+  gosiEmployerShare  Float              @default(0) // Employer GOSI contribution
+  gosiEmployeeShare  Float              @default(0) // Employee GOSI contribution
+  bankName           String?
+  bankAccountNumber  String?
+  ibanNumber         String?            // IBAN for salary transfer
+  
+  // Work Schedule (Saudi Labor Law: 8 hours/day, 48 hours/week)
+  workingHoursPerDay Int                @default(8)
+  workingDaysPerWeek Int                @default(5) // or 6 depending on company
+  weekendDays        String             @default("Friday,Saturday") // Common in Saudi
+  
+  // Leave Entitlements (Saudi Labor Law)
+  annualLeaveDays    Int                @default(21) // Minimum 21 days per year
+  sickLeaveDays      Int                @default(30) // 30 days full pay, 60 days 75% pay
+  hajjLeaveUsed      Boolean            @default(false) // One-time Hajj leave
+  
+  // Emergency Contact
+  emergencyContact   String?
+  emergencyPhone     String?
+  emergencyRelation  String?
+  
+  // End of Service Benefits (EOSB) - Saudi Labor Law
+  eosbEligible       Boolean            @default(true)
+  eosbCalculatedAmount Float            @default(0)
+  
+  // Status
+  status             EmployeeStatus     @default(ACTIVE)
+  terminationDate    DateTime?
+  terminationReason  String?
+  
+  // Relations
+  leaves             Leave[]
+  attendances        Attendance[]
+  payrolls           Payroll[]
+  documents          Document[]
+  performances       Performance[]
+  violations         Violation[]
+  advanceRequests    AdvanceRequest[]
+  ticketRequests     TicketRequest[]
+  
+  // New modular relations
+  educations         EmployeeEducation[]
+  experiences        EmployeeExperience[]
+  certifications     EmployeeCertification[]
+  salaryHistory      EmployeeSalaryHistory[]
+  saudiCompliance    EmployeeSaudiCompliance?
+  dependents         EmployeeDependent[]
+  employeeDocuments  EmployeeDocument[]
+  
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+// ========== Employee Modular Data Tables ==========
+
+// Employee Educational Information
+model EmployeeEducation {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  degree          String    // Bachelor, Master, PhD, Diploma, etc.
+  fieldOfStudy    String
+  institution     String
+  institutionArabic String?
+  country         String?
+  startDate       DateTime?
+  endDate         DateTime?
+  grade           String?   // GPA, Grade, Percentage
+  isHighest       Boolean   @default(false)
+  certificatePath String?   // Path to uploaded certificate
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Employee Experience Information
+model EmployeeExperience {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  company         String
+  companyArabic   String?
+  position        String
+  positionArabic  String?
+  startDate       DateTime
+  endDate         DateTime?
+  isCurrent       Boolean   @default(false)
+  location        String?
+  responsibilities String?  // Job description
+  salary          Float?
+  reasonForLeaving String?
+  certificatePath String?   // Experience letter path
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Employee Certifications & Professional Qualifications
+model EmployeeCertification {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  certificationName String
+  issuingOrganization String
+  issueDate       DateTime
+  expiryDate      DateTime?
+  credentialId    String?
+  credentialUrl   String?
+  certificatePath String?   // Path to uploaded certificate
+  isActive        Boolean   @default(true)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+// Employee Salary History (Complete Audit Trail)
+model EmployeeSalaryHistory {
+  id                 Int       @id @default(autoincrement())
+  employeeId         Int
+  employee           Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  effectiveDate      DateTime
+  effectiveDateHijri String?
+  
+  // Salary Components
+  basicSalary        Float
+  housingAllowance   Float     @default(0)
+  transportAllowance Float     @default(0)
+  foodAllowance      Float     @default(0)
+  otherAllowances    Float     @default(0)
+  totalSalary        Float
+  
+  // GOSI Contributions
+  gosiEmployerShare  Float     @default(0)
+  gosiEmployeeShare  Float     @default(0)
+  
+  // Change Tracking
+  changeReason       String?   // Promotion, Annual increment, Performance bonus, etc.
+  changeType         SalaryChangeType @default(ADJUSTMENT)
+  previousSalary     Float?    // Reference to previous total salary
+  percentageIncrease Float?
+  changedBy          String?   // User who made the change
+  approvedBy         String?   // Manager/HR who approved
+  approvalDate       DateTime?
+  notes              String?
+  
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+}
+
+enum SalaryChangeType {
+  INITIAL           // First salary on joining
+  PROMOTION
+  ANNUAL_INCREMENT
+  PERFORMANCE_BONUS
+  COST_OF_LIVING
+  ADJUSTMENT
+  DEMOTION
+  CORRECTION
+}
+
+// Employee Saudi Compliance Information (Separate for Clarity)
+model EmployeeSaudiCompliance {
+  id                   Int       @id @default(autoincrement())
+  employeeId           Int       @unique
+  employee             Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  
+  // Saudi ID / Iqama
+  saudiId              String?   @unique
+  iqamaNumber          String?   @unique
+  iqamaExpiryDate      DateTime?
+  iqamaExpiryHijri     String?
+  iqamaProfession      String?
+  sponsorName          String?
+  
+  // Passport & Visa
+  passportNumber       String?
+  passportExpiry       DateTime?
+  passportCountry      String?
+  visaNumber           String?
+  visaType             String?
+  visaExpiryDate       DateTime?
+  borderNumber         String?
+  
+  // GOSI
+  gosiNumber           String?   @unique
+  gosiRegistrationDate DateTime?
+  gosiSalary           Float?
+  
+  // Work Permit
+  workPermitNumber     String?
+  workPermitExpiry     DateTime?
+  
+  // Medical Insurance
+  medicalInsuranceProvider String?
+  medicalInsuranceNumber   String?
+  medicalInsuranceExpiry   DateTime?
+  
+  // Exit Re-entry Visa
+  exitReentryNumber    String?
+  exitReentryExpiry    DateTime?
+  
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+}
+
+// Employee Documents Management
+model EmployeeDocument {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  documentType    EmployeeDocumentType
+  documentName    String
+  documentPath    String    // File path or URL
+  uploadDate      DateTime  @default(now())
+  expiryDate      DateTime?
+  isVerified      Boolean   @default(false)
+  verifiedBy      String?
+  verifiedAt      DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum EmployeeDocumentType {
+  PASSPORT
+  SAUDI_ID
+  IQAMA
+  VISA
+  WORK_PERMIT
+  EDUCATIONAL_CERTIFICATE
+  EXPERIENCE_LETTER
+  PROFESSIONAL_LICENSE
+  MEDICAL_INSURANCE
+  GOSI_CERTIFICATE
+  CONTRACT
+  OFFER_LETTER
+  BANK_LETTER
+  PHOTO
+  CV
+  OTHER
+}
+
+// Employee Dependents
+model EmployeeDependent {
+  id              Int       @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee  @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  fullName        String
+  fullNameArabic  String?
+  relationship    DependentRelationship
+  dateOfBirth     DateTime?
+  dateOfBirthHijri String?
+  gender          Gender?
+  nationality     String?
+  iqamaNumber     String?
+  passportNumber  String?
+  isOnSponsor     Boolean   @default(false) // On employee's sponsorship
+  isInsured       Boolean   @default(false) // Medical insurance
+  documents       DependentDocument[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum DependentRelationship {
+  SPOUSE
+  SON
+  DAUGHTER
+  FATHER
+  MOTHER
+  BROTHER
+  SISTER
+  OTHER
+}
+
+// Dependent Documents
+model DependentDocument {
+  id              Int       @id @default(autoincrement())
+  dependentId     Int
+  dependent       EmployeeDependent @relation(fields: [dependentId], references: [id], onDelete: Cascade)
+  documentType    DependentDocumentType
+  documentName    String
+  documentPath    String
+  uploadDate      DateTime  @default(now())
+  expiryDate      DateTime?
+  isVerified      Boolean   @default(false)
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+enum DependentDocumentType {
+  PASSPORT
+  IQAMA
+  BIRTH_CERTIFICATE
+  MARRIAGE_CERTIFICATE
+  MEDICAL_INSURANCE
+  SCHOOL_CERTIFICATE
+  OTHER
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  INTERN
+  TEMPORARY
+}
+
+enum ContractType {
+  LIMITED          // ???? ????? - Fixed-term contract
+  UNLIMITED        // ??? ???? ????? - Indefinite contract
+  SEASONAL         // ?????
+  TASK_BASED       // ?????? ??? ????
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  ON_LEAVE
+  TERMINATED
+  RESIGNED
+  ABSCONDED        // ???? - Specific to Saudi Arabia
+  SUSPENDED
+}
+
+// ========== Leave Management (Saudi Compliant) ==========
+model Leave {
+  id               Int         @id @default(autoincrement())
+  employeeId       Int
+  employee         Employee    @relation(fields: [employeeId], references: [id])
+  leaveType        LeaveType
+  startDate        DateTime
+  startDateHijri   String?
+  endDate          DateTime
+  endDateHijri     String?
+  days             Int
+  reason           String
+  reasonArabic     String?
+  status           LeaveStatus @default(PENDING)
+  approvedBy       String?
+  approvedAt       DateTime?
+  rejectedBy       String?
+  rejectedAt       DateTime?
+  comments         String?
+  isPaid           Boolean     @default(true)
+  deductFromSalary Boolean     @default(false)
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+}
+
+enum LeaveType {
+  ANNUAL           // ????? ????? - 21 days minimum
+  SICK             // ????? ????? - 30 days full, 60 days 75%
+  EMERGENCY        // ????? ?????
+  HAJJ             // ????? ???? - One time only
+  MATERNITY        // ????? ??????? - 10 weeks (70 days)
+  PATERNITY        // ????? ?????? - 3 days
+  MARRIAGE         // ????? ?????? - 5 days
+  DEATH            // ????? ?????? - 5 days for close relatives
+  STUDY            // ????? ??????
+  UNPAID           // ????? ???? ????
+  COMPENSATORY     // ????? ??????? - For overtime
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+// ========== Attendance Management ==========
+model Attendance {
+  id              Int              @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee         @relation(fields: [employeeId], references: [id])
+  date            DateTime
+  dateHijri       String?
+  checkIn         DateTime?
+  checkOut        DateTime?
+  status          AttendanceStatus @default(PRESENT)
+  workHours       Float?
+  hoursWorked     Float?
+  overtime        Float?           // Overtime paid at 150% as per Saudi law
+  lateMinutes     Int              @default(0)
+  earlyLeaveMinutes Int            @default(0)
+  isWeekend       Boolean          @default(false)
+  isHoliday       Boolean          @default(false)
+  holidayName     String?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@unique([employeeId, date])
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  HALF_DAY
+  LATE
+  ON_LEAVE
+  HOLIDAY
+  WEEKEND
+  ABSENT_WITH_EXCUSE
+  ABSENT_WITHOUT_EXCUSE
+}
+
+// ========== Payroll Management (Saudi Compliant) ==========
+model Payroll {
+  id                    Int           @id @default(autoincrement())
+  employeeId            Int
+  employee              Employee      @relation(fields: [employeeId], references: [id])
+  month                 Int
+  monthHijri            Int?
+  year                  Int
+  yearHijri             Int?
+  payPeriodStart        DateTime?
+  
+  // Salary Components
+  basicSalary           Float
+  housingAllowance      Float         @default(0)
+  transportAllowance    Float         @default(0)
+  foodAllowance         Float         @default(0)
+  otherAllowances       Float         @default(0)
+  overtimePay           Float         @default(0)
+  bonuses               Float         @default(0)
+  
+  // Deductions
+  gosiEmployeeDeduction Float         @default(0) // 9.75% or 10% depending on year
+  absenceDeduction      Float         @default(0)
+  lateDeduction         Float         @default(0)
+  loanDeduction         Float         @default(0)
+  otherDeductions       Float         @default(0)
+  
+  // GOSI Contributions (Employer side - for records)
+  gosiEmployerContribution Float      @default(0) // 11.75% or 12%
+  
+  // Totals
+  grossSalary           Float         // Total before deductions
+  totalDeductions       Float
+  netSalary             Float         // Final amount to employee
+  
+  // Payment Details
+  paymentDate           DateTime?
+  paymentDateHijri      String?
+  paymentMethod         String?       // Bank transfer, cash, check
+  paymentReference      String?
+  status                PayrollStatus @default(PENDING)
+  notes                 String?
+  
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+
+  @@unique([employeeId, month, year])
+}
+
+enum PayrollStatus {
+  PENDING
+  APPROVED
+  PROCESSED
+  PAID
+  FAILED
+}
+
+// ========== Violations & Warnings (Saudi Labor Law) ==========
+model Violation {
+  id                Int      @id @default(autoincrement())
+  employeeId        Int
+  employee          Employee @relation(fields: [employeeId], references: [id])
+  violationType     ViolationType
+  description       String
+  descriptionArabic String?
+  date              DateTime @default(now())
+  dateHijri         String?
+  penaltyAmount     Float    @default(0) // Fine amount if applicable
+  warningLevel      Int      @default(1) // 1st, 2nd, 3rd warning
+  issuedBy          String
+  acknowledgedBy    String?
+  acknowledgedAt    DateTime?
+  status            String   @default("ACTIVE")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+enum ViolationType {
+  LATE_ARRIVAL           // ???? ?? ?????
+  EARLY_DEPARTURE        // ?????? ?????
+  ABSENCE                // ????
+  MISCONDUCT             // ??? ????
+  POLICY_VIOLATION       // ?????? ?????
+  SAFETY_VIOLATION       // ?????? ???????
+  INSUBORDINATION        // ??? ????????
+  NEGLIGENCE             // ?????
+  OTHER
+}
+
+// ========== Performance Management ==========
+model Performance {
+  id            Int      @id @default(autoincrement())
+  employeeId    Int
+  employee      Employee @relation(fields: [employeeId], references: [id])
+  reviewPeriod  String
+  reviewPeriodHijri String?
+  rating        Int      // 1-5 scale
+  strengths     String?
+  weaknesses    String?
+  goals         String?
+  comments      String?
+  reviewedBy    String
+  reviewDate    DateTime @default(now())
+  nextReviewDate DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// ========== Document Management (Saudi Compliant) ==========
+model Document {
+  id            Int          @id @default(autoincrement())
+  employeeId    Int
+  employee      Employee     @relation(fields: [employeeId], references: [id])
+  title         String
+  titleArabic   String?
+  type          DocumentType
+  fileUrl       String
+  documentNumber String?      // Document reference number
+  issueDate     DateTime?
+  expiryDate    DateTime?    // For documents like Iqama, passport
+  issuedBy      String?
+  uploadedBy    String
+  isVerified    Boolean      @default(false)
+  verifiedBy    String?
+  verifiedAt    DateTime?
+  notes         String?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+enum DocumentType {
+  SAUDI_ID                 // ?????? ???????
+  IQAMA                    // ???????
+  PASSPORT                 // ???? ?????
+  VISA                     // ????????
+  WORK_PERMIT              // ???? ?????
+  DRIVING_LICENSE          // ???? ???????
+  EDUCATIONAL_CERTIFICATE  // ??????? ?????????
+  EXPERIENCE_CERTIFICATE   // ????? ??????
+  EMPLOYMENT_CONTRACT      // ??? ?????
+  BANK_LETTER              // ???? ?????
+  INSURANCE_CARD           // ????? ???????
+  GOSI_CERTIFICATE         // ????? ?????????
+  MEDICAL_REPORT           // ??????? ?????
+  OTHER
+}
+
+// ========== Saudi Public Holidays ==========
+model PublicHoliday {
+  id            Int      @id @default(autoincrement())
+  name          String
+  nameArabic    String
+  date          DateTime
+  dateHijri     String?
+  isNational    Boolean  @default(false) // National Day, Foundation Day
+  isReligious   Boolean  @default(false) // Eid, etc.
+  isPaid        Boolean  @default(true)
+  year          Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([date, year])
+}
+
+// ========== Payroll Audit Log ==========
+model PayrollAuditLog {
+  id                Int      @id @default(autoincrement())
+  processType       String   // 'BULK' or 'INDIVIDUAL'
+  month             Int
+  year              Int
+  employeeCount     Int      // Number of employees processed
+  successCount      Int      // Successfully created
+  errorCount        Int      // Failed to create
+  processedBy       String   // User email who ran the payroll
+  employeeDetails   String?  // JSON array of employee IDs processed
+  errorDetails      String?  // JSON array of errors if any
+  notes             String?
+  createdAt         DateTime @default(now())
+}
+
+// ========== Employee Onboarding System ==========
+model Onboarding {
+  id                  Int                      @id @default(autoincrement())
+  status              OnboardingStatus         @default(PENDING)
+  
+  // Personal Information
+  firstName           String
+  lastName            String
+  firstNameArabic     String?
+  lastNameArabic      String?
+  email               String                   @unique
+  phone               String
+  dateOfBirth         DateTime
+  gender              String
+  nationality         String
+  isSaudi             Boolean                  @default(false)
+  nationalId          String?                  // Saudi National ID
+  iqamaNumber         String?                  // For expats
+  iqamaExpiry         DateTime?
+  passportNumber      String?
+  passportExpiry      DateTime?
+  
+  // Address
+  address             String?
+  city                String?
+  postalCode          String?
+  
+  // Emergency Contact
+  emergencyContactName  String?
+  emergencyContactPhone String?
+  emergencyContactRelation String?
+  
+  // Employment Details
+  departmentId        Int?
+  position            String?
+  contractType        String?
+  joiningDate         DateTime?
+  
+  // Salary Information
+  basicSalary         Float?
+  housingAllowance    Float?
+  transportAllowance  Float?
+  foodAllowance       Float?
+  
+  // Additional Information
+  bankName            String?
+  bankAccountNumber   String?
+  iban                String?
+  
+  // Document Uploads (store file paths)
+  photoPath           String?
+  cvPath              String?
+  idCopyPath          String?
+  
+  // Relationships
+  experiences         OnboardingExperience[]
+  education           OnboardingEducation[]
+  certificates        OnboardingCertificate[]
+  
+  // Tracking
+  createdBy           String?                  // User who created the onboarding
+  completedBy         String?                  // User who completed the onboarding
+  completedAt         DateTime?
+  employeeId          Int?                     // Created employee ID after completion
+  createdAt           DateTime                 @default(now())
+  updatedAt           DateTime                 @updatedAt
+}
+
+enum OnboardingStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+model OnboardingExperience {
+  id              Int         @id @default(autoincrement())
+  onboardingId    Int
+  onboarding      Onboarding  @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  
+  companyName     String
+  position        String
+  startDate       DateTime
+  endDate         DateTime?
+  isCurrent       Boolean     @default(false)
+  responsibilities String?
+  reasonForLeaving String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OnboardingEducation {
+  id              Int         @id @default(autoincrement())
+  onboardingId    Int
+  onboarding      Onboarding  @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  
+  institution     String
+  degree          String
+  fieldOfStudy    String?
+  startDate       DateTime
+  endDate         DateTime?
+  grade           String?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+model OnboardingCertificate {
+  id              Int         @id @default(autoincrement())
+  onboardingId    Int
+  onboarding      Onboarding  @relation(fields: [onboardingId], references: [id], onDelete: Cascade)
+  
+  name            String
+  issuingOrganization String
+  issueDate       DateTime
+  expiryDate      DateTime?
+  credentialId    String?
+  certificatePath String?     // File path if uploaded
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+}
+
+// ========== Workflow Engine ==========
+model WorkflowDefinition {
+  id                Int                 @id @default(autoincrement())
+  name              String              @unique
+  description       String?
+  entityType        String              // 'LEAVE', 'ADVANCE', 'TICKET', 'PAYROLL', etc.
+  isActive          Boolean             @default(true)
+  steps             WorkflowStep[]
+  instances         WorkflowInstance[]
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+}
+
+model WorkflowStep {
+  id                  Int                 @id @default(autoincrement())
+  workflowDefinitionId Int
+  workflowDefinition  WorkflowDefinition  @relation(fields: [workflowDefinitionId], references: [id], onDelete: Cascade)
+  stepOrder           Int                 // 1, 2, 3, etc.
+  stepName            String              // 'Manager Approval', 'HR Approval', etc.
+  approverRole        String              // 'MANAGER', 'HR', 'ADMIN', etc.
+  requiresApproval    Boolean             @default(true)
+  isOptional          Boolean             @default(false)
+  conditionField      String?             // Field to check for conditional routing
+  conditionValue      String?             // Value that triggers this step
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  @@unique([workflowDefinitionId, stepOrder])
+}
+
+model WorkflowInstance {
+  id                  Int                 @id @default(autoincrement())
+  workflowDefinitionId Int
+  workflowDefinition  WorkflowDefinition  @relation(fields: [workflowDefinitionId], references: [id])
+  entityType          String              // 'LEAVE', 'ADVANCE', 'TICKET', etc.
+  entityId            Int                 // ID of the leave/advance/ticket request
+  currentStep         Int                 @default(1)
+  status              WorkflowStatus      @default(IN_PROGRESS)
+  initiatedBy         String              // Employee email/ID
+  completedAt         DateTime?
+  history             WorkflowHistory[]
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+}
+
+enum WorkflowStatus {
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+  CANCELLED
+  APPROVED
+}
+
+enum WorkflowAction {
+  APPROVED
+  REJECTED
+  COMMENTED
+  PENDING
+}
+
+model WorkflowHistory {
+  id                Int              @id @default(autoincrement())
+  workflowInstanceId Int
+  workflowInstance  WorkflowInstance @relation(fields: [workflowInstanceId], references: [id], onDelete: Cascade)
+  stepOrder         Int
+  stepName          String
+  action            String           // 'APPROVED', 'REJECTED', 'COMMENTED'
+  actionBy          String           // User email/ID who took action
+  comments          String?
+  actionAt          DateTime         @default(now())
+  createdAt         DateTime         @default(now())
+}
+
+// ========== Advance Request Management ==========
+enum AdvanceType {
+  SALARY_ADVANCE
+  EMERGENCY
+  EDUCATION
+  HOUSING
+  MEDICAL
+  OTHER
+}
+
+model AdvanceRequest {
+  id                Int                   @id @default(autoincrement())
+  employeeId        Int
+  employee          Employee              @relation(fields: [employeeId], references: [id])
+  requestDate       DateTime              @default(now())
+  requestType       AdvanceType           @default(SALARY_ADVANCE)
+  amount            Float
+  reason            String
+  reasonArabic      String?
+  status            RequestStatus         @default(PENDING)
+  approvedBy        String?
+  approvedAt        DateTime?
+  rejectedBy        String?
+  rejectedAt        DateTime?
+  rejectionReason   String?
+  comments          String?
+  
+  // Disbursement
+  disbursedAmount   Float?
+  disbursedAt       DateTime?
+  
+  // Repayment details
+  repaymentMonths   Int                   @default(1) // Number of months for repayment
+  monthlyDeduction  Float?                // Amount to deduct per month
+  remainingAmount   Float?                // Remaining amount to be repaid
+  totalRepaid       Float                 @default(0)
+  isFullyRepaid     Boolean               @default(false)
+  repaymentStartDate DateTime?
+  repaymentSchedule AdvanceRepayment[]
+  
+  createdAt         DateTime              @default(now())
+  updatedAt         DateTime              @updatedAt
+}
+
+model AdvanceRepayment {
+  id                Int              @id @default(autoincrement())
+  advanceRequestId  Int
+  advanceRequest    AdvanceRequest   @relation(fields: [advanceRequestId], references: [id], onDelete: Cascade)
+  month             Int
+  year              Int
+  amount            Float
+  status            String           @default("PENDING") // PENDING, DEDUCTED
+  deductedAt        DateTime?
+  payrollId         Int?             // Link to payroll when deducted
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  PAID
+}
+
+// ========== Air Ticket Request Management ==========
+enum FamilyRelationship {
+  SPOUSE
+  CHILD
+  DEPENDENT
+  PARENT
+  SIBLING
+}
+
+model TicketRequest {
+  id                Int                @id @default(autoincrement())
+  employeeId        Int
+  employee          Employee           @relation(fields: [employeeId], references: [id])
+  requestDate       DateTime           @default(now())
+  requestType       TicketType         @default(ANNUAL_LEAVE)
+  travelYear        Int
+  destination       String
+  destinationArabic String?
+  departureDate     DateTime
+  returnDate        DateTime?
+  travelClass       TravelClass        @default(ECONOMY)
+  ticketType        TicketType         @default(ANNUAL_LEAVE)
+  status            RequestStatus      @default(PENDING)
+  
+  // Family members included
+  includeFamily     Boolean            @default(false)
+  familyMembers     TicketFamilyMember[]
+  totalFamilyMembers Int               @default(0)
+  totalFamilyCost   Float              @default(0)
+  employeeTicketCost Float?
+  
+  // Approval
+  approvedBy        String?
+  approvedAt        DateTime?
+  rejectedBy        String?
+  rejectedAt        DateTime?
+  rejectionReason   String?
+  comments          String?
+  
+  // Booking details
+  totalAmount       Float?
+  totalCost         Float?
+  bookingReference  String?
+  isBooked          Boolean            @default(false)
+  ticketNumbers     String?            // JSON array
+  issuedAt          DateTime?
+  
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+}
+
+model TicketFamilyMember {
+  id              Int               @id @default(autoincrement())
+  ticketRequestId Int
+  ticketRequest   TicketRequest     @relation(fields: [ticketRequestId], references: [id], onDelete: Cascade)
+  name            String
+  nameArabic      String?
+  relationship    FamilyRelationship // 'Spouse', 'Child', 'Dependent'
+  age             Int?
+  passportNumber  String?
+  nationality     String?
+  ticketCost      Float?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+enum TravelClass {
+  ECONOMY
+  BUSINESS
+  FIRST_CLASS
+}
+
+enum TicketType {
+  ANNUAL_LEAVE     // Regular annual vacation ticket
+  EMERGENCY        // Emergency travel
+  HAJJ             // Hajj pilgrimage
+  BUSINESS         // Business trip (company-paid)
+}
+
+// ========== Biometric Attendance Integration ==========
+enum BiometricType {
+  FINGERPRINT
+  FACE
+  RFID
+  PALM
+  IRIS
+}
+
+enum BiometricLogType {
+  CHECK_IN
+  CHECK_OUT
+  BREAK_START
+  BREAK_END
+}
+
+model BiometricDevice {
+  id              Int              @id @default(autoincrement())
+  deviceName      String           @unique
+  deviceCode      String           @unique
+  name            String
+  deviceType      BiometricType    // FINGERPRINT, FACE, RFID
+  ipAddress       String
+  port            Int              @default(4370)
+  serialNumber    String?          @unique
+  location        String?          // Department/Branch location
+  isActive        Boolean          @default(true)
+  isOnline        Boolean          @default(false)
+  lastSync        DateTime?
+  lastSyncTime    DateTime?
+  apiEndpoint     String?          // REST API endpoint if applicable
+  apiKey          String?          // API key for authentication
+  logs            BiometricLog[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+enum DeviceType {
+  FINGERPRINT
+  FACE
+  RFID
+  PALM
+  IRIS
+}
+
+model BiometricLog {
+  id              Int              @id @default(autoincrement())
+  deviceId        Int
+  device          BiometricDevice  @relation(fields: [deviceId], references: [id])
+  employeeId      Int?             // Link to Employee
+  employeeCode    String           // Employee code from biometric device
+  timestamp       DateTime
+  logType         BiometricLogType // 'CHECK_IN', 'CHECK_OUT', 'BREAK_START', 'BREAK_END'
+  verifyMode      String?          // 'FINGERPRINT', 'FACE', 'RFID', etc.
+  isProcessed     Boolean          @default(false) // Whether converted to Attendance
+  processedAt     DateTime?
+  attendanceId    Int?             // Link to created Attendance record
+  rawData         String?          // JSON of raw device data
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([employeeCode, timestamp])
+  @@index([isProcessed])
+}
+
+// ========== Talent Acquisition / Recruitment ==========
+enum RecruitmentStage {
+  APPLICATION_REVIEW
+  PHONE_SCREENING
+  TECHNICAL_INTERVIEW
+  HR_INTERVIEW
+  MANAGER_INTERVIEW
+  BACKGROUND_CHECK
+  OFFER_PREPARATION
+  OFFER_EXTENDED
+  ONBOARDING_PREPARATION
+  HIRED
+}
+
+enum InterviewMode {
+  PHONE
+  VIDEO
+  IN_PERSON
+  PANEL
+}
+
+enum InterviewRecommendation {
+  STRONGLY_RECOMMEND
+  RECOMMEND
+  NEUTRAL
+  NOT_RECOMMEND
+  STRONGLY_NOT_RECOMMEND
+}
+
+model JobPosting {
+  id                Int              @id @default(autoincrement())
+  jobTitle          String
+  jobTitleArabic    String?
+  departmentId      Int?
+  department        Department?      @relation(fields: [departmentId], references: [id])
+  position          String
+  employmentType    EmploymentType   @default(FULL_TIME)
+  contractType      ContractType     @default(LIMITED)
+  
+  // Job details
+  description       String
+  descriptionArabic String?
+  requirements      String
+  responsibilities  String
+  
+  // Compensation
+  salaryMin         Float?
+  salaryMax         Float?
+  benefits          String?
+  
+  // Posting details
+  postingDate       DateTime         @default(now())
+  publishedDate     DateTime?
+  closingDate       DateTime?
+  numberOfVacancies Int              @default(1)
+  postedBy          String           // User who created the posting
+  status            JobPostingStatus @default(DRAFT)
+  
+  // Relations
+  applicants        Applicant[]
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+enum JobPostingStatus {
+  DRAFT
+  OPEN
+  PUBLISHED
+  CLOSED
+  FILLED
+  CANCELLED
+}
+
+model Applicant {
+  id                Int              @id @default(autoincrement())
+  jobPostingId      Int
+  jobPosting        JobPosting       @relation(fields: [jobPostingId], references: [id])
+  
+  // Personal info
+  firstName         String
+  lastName          String
+  firstNameArabic   String?
+  lastNameArabic    String?
+  email             String
+  phone             String
+  dateOfBirth       DateTime?
+  nationality       String?
+  isSaudi           Boolean          @default(false)
+  
+  // Application details
+  resumePath        String?
+  coverLetter       String?
+  applicationDate   DateTime         @default(now())
+  appliedDate       DateTime         @default(now())
+  status            ApplicantStatus  @default(APPLIED)
+  currentStage      RecruitmentStage @default(APPLICATION_REVIEW)
+  
+  // Screening
+  screeningNotes    String?
+  score             Int?             // Screening score
+  scoredBy          String?
+  
+  // Relations
+  interviews        Interview[]
+  
+  // If hired
+  onboardingId      Int?             // Link to Onboarding when offer accepted
+  employeeId        Int?             // Link to Employee when fully hired
+  
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+}
+
+enum ApplicantStatus {
+  APPLIED
+  NEW
+  SHORTLISTED
+  SCREENING
+  INTERVIEW_SCHEDULED
+  INTERVIEWED
+  OFFER_EXTENDED
+  OFFER_ACCEPTED
+  OFFER_REJECTED
+  REJECTED
+  WITHDRAWN
+}
+
+model Interview {
+  id              Int                     @id @default(autoincrement())
+  applicantId     Int
+  applicant       Applicant               @relation(fields: [applicantId], references: [id], onDelete: Cascade)
+  interviewType   InterviewType           @default(PHONE_SCREEN)
+  interviewMode   InterviewMode           @default(PHONE)
+  scheduledDate   DateTime
+  scheduledTime   String?                 // Time in HH:MM format
+  location        String?                 // Office/Online
+  interviewerName String?
+  interviewerEmail String?
+  
+  // Results
+  status          InterviewStatus         @default(SCHEDULED)
+  feedback        String?
+  rating          Int?                    // 1-5 scale
+  outcome         String?                 // PASS, FAIL, PENDING
+  recommendation  InterviewRecommendation?
+  completedAt     DateTime?
+  
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+}
+
+enum InterviewType {
+  PHONE_SCREEN
+  VIDEO
+  IN_PERSON
+  TECHNICAL
+  HR
+  FINAL
+}
+
+enum InterviewStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  RESCHEDULED
+  NO_SHOW
+}
+
+// ========== ERP Integration ==========
+enum ERPSystem {
+  SAP
+  ORACLE_ERP
+  ODOO
+  MICROSOFT_DYNAMICS
+  PEOPLESOFT
+  WORKDAY
+  CUSTOM
+}
+
+enum SyncDirection {
+  BIDIRECTIONAL
+  TO_ERP
+  FROM_ERP
+}
+
+enum SyncAction {
+  CREATE
+  UPDATE
+  DELETE
+  SYNC
+}
+
+enum SyncStatus {
+  SUCCESS
+  FAILED
+  PARTIAL
+  IN_PROGRESS
+}
+
+model ERPIntegration {
+  id              Int              @id @default(autoincrement())
+  name            String
+  erpSystem       ERPSystem        // 'SAP', 'Oracle', 'Odoo', 'Custom'
+  isActive        Boolean          @default(true)
+  
+  // Connection details
+  apiEndpoint     String
+  apiKey          String?
+  username        String?
+  password        String?          // Should be encrypted
+  
+  // Sync configuration
+  syncFrequency   String           @default("DAILY") // HOURLY, DAILY, WEEKLY, MANUAL
+  syncDirection   SyncDirection    @default(BIDIRECTIONAL) // BIDIRECTIONAL, TO_ERP, FROM_ERP
+  lastSyncAt      DateTime?
+  lastSyncTime    DateTime?
+  nextSyncAt      DateTime?
+  
+  // Field mappings (JSON)
+  employeeFieldMap String?         // JSON mapping of HRMS fields to ERP fields
+  payrollFieldMap  String?
+  employeeMapping  String?
+  payrollMapping   String?
+  
+  // Relations
+  syncLogs        ERPSyncLog[]
+  
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model ERPSyncLog {
+  id              Int              @id @default(autoincrement())
+  erpIntegrationId Int
+  integrationId   Int              // Duplicate for compatibility
+  erpIntegration  ERPIntegration   @relation(fields: [erpIntegrationId], references: [id], onDelete: Cascade)
+  entityType      String?          // 'EMPLOYEE', 'PAYROLL', 'DEPARTMENT'
+  syncType        String           // 'EMPLOYEE', 'PAYROLL', 'DEPARTMENT'
+  direction       SyncDirection    // 'TO_ERP', 'FROM_ERP'
+  status          SyncStatus       // 'SUCCESS', 'FAILED', 'PARTIAL'
+  recordsProcessed Int             @default(0)
+  recordCount     Int              @default(0)
+  successCount    Int              @default(0)
+  recordsFailed   Int              @default(0)
+  errorCount      Int              @default(0)
+  errorDetails    String?          // JSON of errors
+  duration        Int?             // Sync duration in milliseconds
+  syncStarted     DateTime         @default(now())
+  syncCompleted   DateTime?
+  createdAt       DateTime         @default(now())
+}
