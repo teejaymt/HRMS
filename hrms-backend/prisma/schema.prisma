@@ -27,6 +27,17 @@ enum Role {
   EMPLOYEE
 }
 
+enum JobLevel {
+  EMPLOYEE           // Regular employee
+  SUPERVISOR         // Team supervisor
+  TEAM_LEAD          // Team lead
+  MANAGER            // Department manager
+  SENIOR_MANAGER     // Senior manager
+  DIRECTOR           // Director
+  VP                 // Vice President
+  CEO                // Chief Executive Officer
+}
+
 // ========== Employee Management (Saudi Compliant) ==========
 model Department {
   id              Int        @id @default(autoincrement())
@@ -90,6 +101,7 @@ model Employee {
   department         Department?        @relation(fields: [departmentId], references: [id])
   position           String
   positionArabic     String?
+  jobLevel           JobLevel?          @default(EMPLOYEE) // Hierarchy level
   employmentType     EmploymentType     @default(FULL_TIME)
   contractType       ContractType       @default(LIMITED) // Saudi law: limited or unlimited
   joinDate           DateTime           @default(now())
@@ -97,6 +109,11 @@ model Employee {
   contractStartDate  DateTime?
   contractEndDate    DateTime?          // For limited contracts
   probationEndDate   DateTime?          // 90 days probation as per Saudi law
+  
+  // Hierarchy Relations
+  supervisorId       Int?               // Direct supervisor/manager
+  supervisor         Employee?          @relation("EmployeeSupervisor", fields: [supervisorId], references: [id], onDelete: SetNull)
+  subordinates       Employee[]         @relation("EmployeeSupervisor")
   
   // Salary & Financial (Saudi Compliant)
   basicSalary        Float              // Basic salary

@@ -1,0 +1,91 @@
+-- RedefineTables
+PRAGMA defer_foreign_keys=ON;
+PRAGMA foreign_keys=OFF;
+CREATE TABLE "new_Employee" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" INTEGER,
+    "employeeCode" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
+    "firstNameArabic" TEXT,
+    "lastNameArabic" TEXT,
+    "fatherName" TEXT,
+    "grandfatherName" TEXT,
+    "email" TEXT NOT NULL,
+    "phone" TEXT,
+    "dateOfBirth" DATETIME,
+    "dateOfBirthHijri" TEXT,
+    "gender" TEXT,
+    "nationality" TEXT,
+    "isSaudi" BOOLEAN NOT NULL DEFAULT false,
+    "saudiId" TEXT,
+    "iqamaNumber" TEXT,
+    "iqamaExpiryDate" DATETIME,
+    "iqamaExpiryHijri" TEXT,
+    "passportNumber" TEXT,
+    "passportExpiry" DATETIME,
+    "visaNumber" TEXT,
+    "borderNumber" TEXT,
+    "gosiNumber" TEXT,
+    "gosiRegistrationDate" DATETIME,
+    "gosiContribution" BOOLEAN NOT NULL DEFAULT false,
+    "address" TEXT,
+    "addressArabic" TEXT,
+    "city" TEXT,
+    "state" TEXT,
+    "zipCode" TEXT,
+    "country" TEXT DEFAULT 'Saudi Arabia',
+    "departmentId" INTEGER,
+    "position" TEXT NOT NULL,
+    "positionArabic" TEXT,
+    "jobLevel" TEXT DEFAULT 'EMPLOYEE',
+    "employmentType" TEXT NOT NULL DEFAULT 'FULL_TIME',
+    "contractType" TEXT NOT NULL DEFAULT 'LIMITED',
+    "joinDate" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "joinDateHijri" TEXT,
+    "contractStartDate" DATETIME,
+    "contractEndDate" DATETIME,
+    "probationEndDate" DATETIME,
+    "supervisorId" INTEGER,
+    "basicSalary" REAL NOT NULL,
+    "housingAllowance" REAL NOT NULL DEFAULT 0,
+    "transportAllowance" REAL NOT NULL DEFAULT 0,
+    "foodAllowance" REAL NOT NULL DEFAULT 0,
+    "otherAllowances" REAL NOT NULL DEFAULT 0,
+    "totalSalary" REAL NOT NULL,
+    "gosiEmployerShare" REAL NOT NULL DEFAULT 0,
+    "gosiEmployeeShare" REAL NOT NULL DEFAULT 0,
+    "bankName" TEXT,
+    "bankAccountNumber" TEXT,
+    "ibanNumber" TEXT,
+    "workingHoursPerDay" INTEGER NOT NULL DEFAULT 8,
+    "workingDaysPerWeek" INTEGER NOT NULL DEFAULT 5,
+    "weekendDays" TEXT NOT NULL DEFAULT 'Friday,Saturday',
+    "annualLeaveDays" INTEGER NOT NULL DEFAULT 21,
+    "sickLeaveDays" INTEGER NOT NULL DEFAULT 30,
+    "hajjLeaveUsed" BOOLEAN NOT NULL DEFAULT false,
+    "emergencyContact" TEXT,
+    "emergencyPhone" TEXT,
+    "emergencyRelation" TEXT,
+    "eosbEligible" BOOLEAN NOT NULL DEFAULT true,
+    "eosbCalculatedAmount" REAL NOT NULL DEFAULT 0,
+    "status" TEXT NOT NULL DEFAULT 'ACTIVE',
+    "terminationDate" DATETIME,
+    "terminationReason" TEXT,
+    "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" DATETIME NOT NULL,
+    CONSTRAINT "Employee_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Employee_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department" ("id") ON DELETE SET NULL ON UPDATE CASCADE,
+    CONSTRAINT "Employee_supervisorId_fkey" FOREIGN KEY ("supervisorId") REFERENCES "Employee" ("id") ON DELETE SET NULL ON UPDATE CASCADE
+);
+INSERT INTO "new_Employee" ("address", "addressArabic", "annualLeaveDays", "bankAccountNumber", "bankName", "basicSalary", "borderNumber", "city", "contractEndDate", "contractStartDate", "contractType", "country", "createdAt", "dateOfBirth", "dateOfBirthHijri", "departmentId", "email", "emergencyContact", "emergencyPhone", "emergencyRelation", "employeeCode", "employmentType", "eosbCalculatedAmount", "eosbEligible", "fatherName", "firstName", "firstNameArabic", "foodAllowance", "gender", "gosiContribution", "gosiEmployeeShare", "gosiEmployerShare", "gosiNumber", "gosiRegistrationDate", "grandfatherName", "hajjLeaveUsed", "housingAllowance", "ibanNumber", "id", "iqamaExpiryDate", "iqamaExpiryHijri", "iqamaNumber", "isSaudi", "joinDate", "joinDateHijri", "lastName", "lastNameArabic", "nationality", "otherAllowances", "passportExpiry", "passportNumber", "phone", "position", "positionArabic", "probationEndDate", "saudiId", "sickLeaveDays", "state", "status", "terminationDate", "terminationReason", "totalSalary", "transportAllowance", "updatedAt", "userId", "visaNumber", "weekendDays", "workingDaysPerWeek", "workingHoursPerDay", "zipCode") SELECT "address", "addressArabic", "annualLeaveDays", "bankAccountNumber", "bankName", "basicSalary", "borderNumber", "city", "contractEndDate", "contractStartDate", "contractType", "country", "createdAt", "dateOfBirth", "dateOfBirthHijri", "departmentId", "email", "emergencyContact", "emergencyPhone", "emergencyRelation", "employeeCode", "employmentType", "eosbCalculatedAmount", "eosbEligible", "fatherName", "firstName", "firstNameArabic", "foodAllowance", "gender", "gosiContribution", "gosiEmployeeShare", "gosiEmployerShare", "gosiNumber", "gosiRegistrationDate", "grandfatherName", "hajjLeaveUsed", "housingAllowance", "ibanNumber", "id", "iqamaExpiryDate", "iqamaExpiryHijri", "iqamaNumber", "isSaudi", "joinDate", "joinDateHijri", "lastName", "lastNameArabic", "nationality", "otherAllowances", "passportExpiry", "passportNumber", "phone", "position", "positionArabic", "probationEndDate", "saudiId", "sickLeaveDays", "state", "status", "terminationDate", "terminationReason", "totalSalary", "transportAllowance", "updatedAt", "userId", "visaNumber", "weekendDays", "workingDaysPerWeek", "workingHoursPerDay", "zipCode" FROM "Employee";
+DROP TABLE "Employee";
+ALTER TABLE "new_Employee" RENAME TO "Employee";
+CREATE UNIQUE INDEX "Employee_userId_key" ON "Employee"("userId");
+CREATE UNIQUE INDEX "Employee_employeeCode_key" ON "Employee"("employeeCode");
+CREATE UNIQUE INDEX "Employee_email_key" ON "Employee"("email");
+CREATE UNIQUE INDEX "Employee_saudiId_key" ON "Employee"("saudiId");
+CREATE UNIQUE INDEX "Employee_iqamaNumber_key" ON "Employee"("iqamaNumber");
+CREATE UNIQUE INDEX "Employee_gosiNumber_key" ON "Employee"("gosiNumber");
+PRAGMA foreign_keys=ON;
+PRAGMA defer_foreign_keys=OFF;

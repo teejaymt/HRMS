@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../Prisma/prisma.service';
-import { EmployeeStatus, Gender, EmploymentType } from '@prisma/client';
+import { EmployeeStatus, Gender, EmploymentType, JobLevel } from '@prisma/client';
 
 @Injectable()
 export class EmployeesService {
@@ -159,6 +159,26 @@ export class EmployeesService {
       include: {
         department: true,
         user: { select: { email: true, role: true, isActive: true } },
+        supervisor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            position: true,
+            jobLevel: true,
+          },
+        },
+        subordinates: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            position: true,
+            jobLevel: true,
+          },
+        },
       },
       orderBy: { createdAt: 'desc' },
     });
@@ -170,6 +190,27 @@ export class EmployeesService {
       include: {
         department: true,
         user: true,
+        supervisor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            position: true,
+            jobLevel: true,
+          },
+        },
+        subordinates: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            position: true,
+            jobLevel: true,
+            email: true,
+          },
+        },
         leaves: { take: 10, orderBy: { createdAt: 'desc' } },
         attendances: { take: 30, orderBy: { date: 'desc' } },
         payrolls: { take: 12, orderBy: { year: 'desc' } },
@@ -181,6 +222,130 @@ export class EmployeesService {
     }
 
     return employee;
+  }
+
+  async getHierarchy(employeeId: number) {
+    const employee = await this.findOne(employeeId);
+    
+    // Get all ancestors (supervisors up the chain)
+    const ancestors = await this.getAncestors(employeeId);
+    
+    // Get all descendants (subordinates down the chain)
+    const descendants = await this.getDescendants(employeeId);
+    
+    return {
+      employee: {
+        id: employee.id,
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        position: employee.position,
+        jobLevel: employee.jobLevel,
+        employeeCode: employee.employeeCode,
+      },
+      ancestors,
+      descendants,
+    };
+  }
+
+  private async getAncestors(employeeId: number, ancestors: any[] = []): Promise<any[]> {
+    const employee = await this.prisma.employee.findUnique({
+      where: { id: employeeId },
+      include: {
+        supervisor: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            employeeCode: true,
+            position: true,
+            jobLevel: true,
+            supervisorId: true,
+          },
+        },
+      },
+    });
+
+    if (employee?.supervisor) {
+      ancestors.push(employee.supervisor);
+      if (employee.supervisor.supervisorId) {
+        await this.getAncestors(employee.supervisor.id, ancestors);
+      }
+    }
+
+    return ancestors;
+  }
+
+  private async getDescendants(employeeId: number): Promise<any[]> {
+    const subordinates = await this.prisma.employee.findMany({
+      where: { supervisorId: employeeId },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        employeeCode: true,
+        position: true,
+        jobLevel: true,
+        email: true,
+      },
+    });
+
+    const descendants: any[] = [];
+    for (const subordinate of subordinates) {
+      descendants.push({
+        ...subordinate,
+        subordinates: await this.getDescendants(subordinate.id),
+      });
+    }
+
+    return descendants;
+  }
+
+  async getTeamMembers(managerId: number) {
+    // Get direct reports
+    const directReports = await this.prisma.employee.findMany({
+      where: { supervisorId: managerId, status: EmployeeStatus.ACTIVE },
+      include: {
+        department: true,
+        user: { select: { email: true, role: true } },
+      },
+    });
+
+    // Get all team members recursively
+    const allTeamMembers: any[] = [];
+    for (const report of directReports) {
+      allTeamMembers.push(report);
+      const subTeam = await this.getTeamMembers(report.id);
+      allTeamMembers.push(...subTeam);
+    }
+
+    return allTeamMembers;
+  }
+
+  async assignSupervisor(employeeId: number, supervisorId: number) {
+    // Validate supervisor exists
+    await this.findOne(supervisorId);
+    
+    // Prevent circular references
+    const supervisorHierarchy = await this.getAncestors(supervisorId);
+    if (supervisorHierarchy.some(ancestor => ancestor.id === employeeId)) {
+      throw new Error('Cannot assign supervisor: circular hierarchy detected');
+    }
+
+    return this.prisma.employee.update({
+      where: { id: employeeId },
+      data: { supervisorId },
+      include: {
+        supervisor: true,
+        subordinates: true,
+      },
+    });
+  }
+
+  async removeSupervisor(employeeId: number) {
+    return this.prisma.employee.update({
+      where: { id: employeeId },
+      data: { supervisorId: null },
+    });
   }
 
   async update(id: number, data: any) {

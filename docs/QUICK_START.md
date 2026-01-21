@@ -411,6 +411,6 @@ You're ready when:
 
 **Estimated Setup Time**: 5 minutes  
 **Difficulty**: Easy  
-**Prerequisites**: Node.js, npm, existing HRMS installation
+**Prerequisites**: Node.js 22+, npm, existing HRMS installation
 
 **Happy Building! 🚀**

@@ -42,6 +42,29 @@ export class EmployeesController {
     return this.employeesService.getStats();
   }
 
+  @Get(':id/hierarchy')
+  getHierarchy(@Param('id') id: string) {
+    return this.employeesService.getHierarchy(+id);
+  }
+
+  @Get(':id/team')
+  getTeamMembers(@Param('id') id: string) {
+    return this.employeesService.getTeamMembers(+id);
+  }
+
+  @Post(':id/supervisor')
+  assignSupervisor(
+    @Param('id') id: string,
+    @Body() data: { supervisorId: number },
+  ) {
+    return this.employeesService.assignSupervisor(+id, data.supervisorId);
+  }
+
+  @Delete(':id/supervisor')
+  removeSupervisor(@Param('id') id: string) {
+    return this.employeesService.removeSupervisor(+id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.employeesService.findOne(+id);
